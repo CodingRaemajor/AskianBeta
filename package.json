@@ -1,0 +1,23 @@
+{
+  "name": "askian-ai",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "pnpm -C apps/web dev",
+    "build:web": "pnpm -C apps/web build",
+    "start:web": "pnpm -C apps/web start",
+    "build:widget": "pnpm -C apps/widget build",
+    "index:crawl": "pnpm -C packages/indexer tsx cli.ts crawl",
+    "index:chunk": "pnpm -C packages/indexer tsx cli.ts chunk",
+    "index:embed": "pnpm -C packages/indexer tsx cli.ts embed",
+    "purge": "node scripts/purge.ts",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
