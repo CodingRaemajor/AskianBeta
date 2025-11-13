@@ -1,110 +1,210 @@
-// apps/web/app/page.tsx
 "use client";
 
-import { useState } from 'react';
+import React, { useState, FormEvent } from "react";
+
+type AskResponse = {
+  answer?: string;
+  sources?: { url: string; title?: string }[];
+  [key: string]: any;
+};
 
 export default function HomePage() {
-  const [url, setUrl] = useState('https://www.uregina.ca/');
-  const [busy, setBusy] = useState(false);
-  const [q, setQ] = useState('What scholarships are available?');
-  const [answer, setAnswer] = useState('');
-  const [sources, setSources] = useState<any[]>([]);
+  const [siteUrl, setSiteUrl] = useState("https://www.uregina.ca/");
+  const [question, setQuestion] = useState("What scholarships are available?");
+  const [answer, setAnswer] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [indexing, setIndexing] = useState(false);
+  const [asking, setAsking] = useState(false);
 
-  async function indexSite(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
+  // 🔹 Index button handler
+  const handleIndexSite = async () => {
+    setError(null);
+    setAnswer("");
+    setIndexing(true);
     try {
-      const r = await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url }),
+      const res = await fetch("/api/index", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: siteUrl }),
       });
-      const j = await r.json();
-      setAnswer(`Indexed ${j.indexed ?? 0} chunks from site.`);
-      setSources([]);
-    } catch (e: any) {
-      setAnswer(`Indexing failed: ${e?.message ?? e}`);
-      setSources([]);
-    } finally {
-      setBusy(false);
-    }
-  }
 
-  async function ask(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const r = await fetch('/api/ask', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ query: q, topK: 4 }),
-      });
-      const j = await r.json();
-      setAnswer(j.answer ?? String(j));
-      setSources(j.sources ?? []);
-    } catch (e: any) {
-      setAnswer(`Ask failed: ${e?.message ?? e}`);
-      setSources([]);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || `Index failed: ${res.status}`);
+      }
+
+      setAnswer("✅ Site indexed successfully. You can ask questions now.");
+    } catch (err: any) {
+      setError(err.message || "Failed to index site.");
     } finally {
-      setBusy(false);
+      setIndexing(false);
     }
-  }
+  };
+
+  // 🔹 Ask button / form submit handler
+  const handleAsk = async (e: FormEvent) => {
+    e.preventDefault(); // ❗ stop full page reload
+    setError(null);
+    setAnswer("");
+    setAsking(true);
+    try {
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          url: siteUrl, // include if your backend expects it
+        }),
+      });
+
+      const data: AskResponse = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || `Ask failed: ${res.status}`);
+      }
+
+      if (data.answer) {
+        setAnswer(data.answer);
+      } else {
+        // fallback: show raw JSON if schema is slightly different
+        setAnswer(JSON.stringify(data, null, 2));
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to get answer.");
+    } finally {
+      setAsking(false);
+    }
+  };
 
   return (
     <main
       style={{
         minHeight: "100vh",
+        fontFamily:
+          "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
         flexDirection: "column",
-        gap: "1rem",
-        padding: "2rem",
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        maxWidth: 900,
-        margin: '0 auto',
+        alignItems: "center",
+        padding: "40px 16px",
       }}
     >
-      <h1>Askian Beta – RAG Chat</h1>
-      <form onSubmit={indexSite} style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <input
-          value={url}
-          onChange={e => setUrl(e.target.value)}
-          placeholder="https://example.com"
-          style={{ flex: 1, padding: 8, border: '1px solid #ccc', borderRadius: 6 }}
-        />
-        <button disabled={busy} style={{ padding: '8px 12px' }}>Index Site</button>
+      <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "32px" }}>
+        Askian Beta – RAG Chat
+      </h1>
+
+      {/* Index + Ask form */}
+      <form
+        onSubmit={handleAsk}
+        style={{
+          width: "100%",
+          maxWidth: "1100px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+        }}
+      >
+        {/* URL row */}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <input
+            type="url"
+            value={siteUrl}
+            onChange={(e) => setSiteUrl(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              fontSize: "14px",
+            }}
+          />
+          <button
+            type="button"
+            onClick={handleIndexSite}
+            disabled={indexing}
+            style={{
+              padding: "10px 16px",
+              borderRadius: "4px",
+              border: "1px solid #333",
+              backgroundColor: indexing ? "#eee" : "#f5f5f5",
+              cursor: indexing ? "default" : "pointer",
+            }}
+          >
+            {indexing ? "Indexing…" : "Index Site"}
+          </button>
+        </div>
+
+        {/* Question row */}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <input
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask a question about this site…"
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              fontSize: "14px",
+            }}
+          />
+          <button
+            type="submit"
+            disabled={asking}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "4px",
+              border: "1px solid #333",
+              backgroundColor: asking ? "#eee" : "#f5f5f5",
+              cursor: asking ? "default" : "pointer",
+            }}
+          >
+            {asking ? "Thinking…" : "Ask"}
+          </button>
+        </div>
       </form>
 
-      <form onSubmit={ask} style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <input
-          value={q}
-          onChange={e => setQ(e.target.value)}
-          placeholder="Ask a question about the indexed site"
-          style={{ flex: 1, padding: 8, border: '1px solid #ccc', borderRadius: 6 }}
-        />
-        <button disabled={busy} style={{ padding: '8px 12px' }}>Ask</button>
-      </form>
+      {/* Status / answer */}
+      <section
+        style={{
+          width: "100%",
+          maxWidth: "1100px",
+          marginTop: "24px",
+          fontSize: "14px",
+          lineHeight: 1.5,
+        }}
+      >
+        {error && (
+          <div
+            style={{
+              padding: "12px 14px",
+              borderRadius: "4px",
+              backgroundColor: "#ffe5e5",
+              color: "#a00",
+              marginBottom: "12px",
+            }}
+          >
+            ❌ {error}
+          </div>
+        )}
 
-      {answer && (
-        <div style={{ width: '100%', background: '#fafafa', border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-          <h3>Answer</h3>
-          <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{answer}</pre>
-        </div>
-      )}
-
-      {!!sources.length && (
-        <div style={{ width: '100%' }}>
-          <h3>Sources</h3>
-          <ul>
-            {sources.map((s, i) => (
-              <li key={i}>
-                <a href={s.url} target="_blank" rel="noreferrer">{s.title || s.url}</a> (score: {s.score?.toFixed(3)})
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {(answer || indexing || asking) && (
+          <div
+            style={{
+              padding: "12px 14px",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+              whiteSpace: "pre-wrap",
+              backgroundColor: "#fafafa",
+            }}
+          >
+            {answer ||
+              (indexing && "Indexing site…") ||
+              (asking && "Getting answer…")}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
