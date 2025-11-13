@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { rateLimit } from '../lib/security';
+import { rateLimit } from './app/lib/security';
 
 export function middleware(req: NextRequest) {
   const ip = (req.ip || req.headers.get('x-forwarded-for') || 'anon').toString();

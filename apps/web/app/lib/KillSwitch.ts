@@ -4,7 +4,7 @@ import path from 'path';
 let CACHE: boolean | null = null;
 
 function flagPath() {
-  return path.join(process.cwd(), '..', '..', '..', 'data', 'flags.json');
+  return path.join(process.cwd(), '..', '..', 'data', 'flags.json');
 }
 
 export async function isKilled(): Promise<boolean> {
