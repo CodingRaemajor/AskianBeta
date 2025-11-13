@@ -1,0 +1,44 @@
+[
+  {
+    "id": "uregina-overview-001",
+    "source": "uregina",
+    "title": "University of Regina — Overview",
+    "url": "https://www.uregina.ca/",
+    "text": "The University of Regina is a comprehensive, mid-sized university located in Regina, Saskatchewan, Canada. It offers undergraduate and graduate programs across multiple faculties and supports student success with scholarships, co-op education, and student services."
+  },
+  {
+    "id": "future-students-admissions-001",
+    "source": "uregina",
+    "title": "Admissions — Future Students",
+    "url": "https://www.uregina.ca/future-students/",
+    "text": "Future students can explore undergraduate programs, admission requirements, important deadlines, and how to apply. International and domestic applicants can find guidance on English proficiency, transcripts, and program-specific criteria."
+  },
+  {
+    "id": "registrar-dates-001",
+    "source": "uregina",
+    "title": "Registrar — Important Dates",
+    "url": "https://www.uregina.ca/registrar/",
+    "text": "The Registrar’s Office maintains the academic schedule, including registration windows, add/drop deadlines, tuition due dates, exam periods, and convocation details. Students should review dates each term to avoid late fees and academic penalties."
+  },
+  {
+    "id": "housing-001",
+    "source": "uregina",
+    "title": "Student Housing",
+    "url": "https://www.uregina.ca/housing/",
+    "text": "On-campus housing provides furnished suites, meal plan options, study spaces, and community programming. Living on campus offers proximity to classes, student supports, and recreational facilities."
+  },
+  {
+    "id": "safa-scholarships-001",
+    "source": "uregina",
+    "title": "Scholarships and Financial Aid",
+    "url": "https://www.uregina.ca/safa/",
+    "text": "Students can access scholarships, awards, and bursaries based on academic achievement, leadership, and financial need. The Student Awards and Financial Aid office provides guidance on applications, eligibility, and government student loans."
+  },
+  {
+    "id": "student-services-001",
+    "source": "uregina",
+    "title": "Student Services — Support & Wellness",
+    "url": "https://www.uregina.ca/student/",
+    "text": "Student Services include academic advising, counselling, accessibility support, career services, and health & wellness programs. These supports help students navigate university life and achieve academic success."
+  }
+]

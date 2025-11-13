@@ -4,3 +4,4 @@ dist
 .env
 data/pages.json
 data/passages.jsonl
+.env

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Askian Widget</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: #0B0E14; color: #E6EAF2;
+    }
+    .wrap { display: flex; flex-direction: column; height: 100vh; }
+    .head { padding: 10px 12px; background: #101727; border-bottom: 1px solid #1C2740; font-weight: 600; }
+    .scroll { flex: 1; overflow: auto; padding: 12px; }
+    .msg { margin: 8px 0; padding: 10px 12px; border: 1px solid #1C2740; border-radius: 10px; background: #0F1421; }
+    .msg.user { background: #131b2d; }
+    form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #1C2740; background: #101727; }
+    input[type="text"] { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid #1C2740; background: #0F1421; color: #E6EAF2; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #1C2740; background: #0F1421; color: #E6EAF2; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">Askian</div>
+    <div id="log" class="scroll" aria-live="polite"></div>
+    <form id="f">
+      <input id="q" type="text" placeholder="Ask about U of R..." autocomplete="off" />
+      <button type="submit">Ask</button>
+    </form>
+  </div>
+
+  <script type="module">
+    const log = document.getElementById('log');
+    const form = document.getElementById('f');
+    const q    = document.getElementById('q');
+
+    const state = {
+      apiBase: new URLSearchParams(location.search).get('apiBase') || '/api',
+      origin: '*',
+    };
+
+    function addMessage(text, who='bot') {
+      const el = document.createElement('div');
+      el.className = `msg ${who === 'user' ? 'user' : ''}`;
+      el.textContent = text;
+      log.appendChild(el);
+      requestAnimationFrame(() => window.parent?.postMessage({ type: 'askian:resize', height: document.body.scrollHeight }, '*'));
+      log.scrollTop = log.scrollHeight;
+    }
+
+    window.addEventListener('message', (e) => {
+      if (!e?.data) return;
+      if (e.data.type === 'askian:init') {
+        state.origin = e.origin;
+      }
+      if (e.data.type === 'askian:push') {
+        addMessage(String(e.data.text ?? ''), 'bot');
+      }
+    });
+
+    window.parent?.postMessage({ type: 'askian:ready' }, '*');
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const text = (q.value ?? '').trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      q.value = '';
+
+      try {
+        const r = await fetch(`${state.apiBase}/ask`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ query: text })
+        });
+        const data = await r.json();
+        addMessage(String(data?.answer ?? 'No answer.'), 'bot');
+        window.parent?.postMessage({ type: 'askian:answer', query: text, data }, state.origin || '*');
+      } catch (e) {
+        addMessage('Sorry, something went wrong.');
+      }
+    });
+  </script>
+</body>
+</html>

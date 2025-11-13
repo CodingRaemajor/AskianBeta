@@ -1,0 +1,5 @@
+{"ts":"2025-11-12T00:00:00.000Z","level":"info","msg":"Askian boot","pid":1}
+{"ts":"2025-11-12T00:00:01.000Z","level":"info","msg":"Embedding batch","count":32}
+{"ts":"2025-11-12T00:00:02.000Z","level":"warn","msg":"Rate limited","ip":"127.0.0.1"}
+{"ts":"2025-11-12T00:00:03.000Z","level":"error","msg":"Failed to embed texts","error":"TimeoutError: Request timed out"}
+{"ts":"2025-11-12T00:00:04.000Z","level":"info","msg":"Retrying embedding batch","count":32}

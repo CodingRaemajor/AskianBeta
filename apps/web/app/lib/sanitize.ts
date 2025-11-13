@@ -16,7 +16,7 @@ export function sanitizeUrl(u: string) {
 }
 
 // ---- Typed link transformer (no undefined fields) -----------------
-const linkTransform: Transformer = (_tag, attribs) => {
+const linkTransform: Transformer = (_tag: string, attribs: Attributes) => {
   try {
     const href = (attribs as Attributes).href; // raw href (may be undefined)
     if (!href) {
