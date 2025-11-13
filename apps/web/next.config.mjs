@@ -1,12 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   poweredByHeader: false,
-  experimental: {
-    // Only needed if you're using the /app directory (which you are / will).
-    appDir: true
-  },
-  async headers() {
+  headers: async () => {
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
@@ -15,7 +10,7 @@ const nextConfig = {
       "connect-src 'self'",
       "frame-ancestors 'self' https://www.uregina.ca https://uregina.ca",
       "object-src 'none'",
-      "base-uri 'self'"
+      "base-uri 'self'",
     ].join("; ");
 
     return [
@@ -25,11 +20,12 @@ const nextConfig = {
           { key: "Content-Security-Policy", value: csp },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Permissions-Policy", value: "geolocation=()" }
-        ]
-      }
+        ],
+      },
     ];
-  }
+  },
+  // ❌ make sure this is removed:
+  // experimental: { appDir: true },
 };
 
 export default nextConfig;
